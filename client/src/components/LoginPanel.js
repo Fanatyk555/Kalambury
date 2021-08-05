@@ -43,10 +43,10 @@ class LoginPanel extends React.Component{
     const wrongLogin = "Niepoprawny login lub hasło";
     const data = [this.state.userLogin, this.state.userPassword];
     axios
-      .post('http://192.168.0.12:9000/login', data)
+      .post('http://192.168.0.2:9000/login', data)
       .catch(err => console.error(err));
     setTimeout(() => {
-      fetch('http://192.168.0.12:9000/login')
+      fetch('http://192.168.0.2:9000/login')
       .then(res => res.json())
       .then(res => this.setState({ apiResponseUserId: res }))
     }, 300);
@@ -66,7 +66,7 @@ class LoginPanel extends React.Component{
     const signup = "Zarejestrowano pomyślnie!";
     const data = [this.state.userLogin, this.state.userPassword, this.state.userEMail];
     axios
-      .post('http://192.168.0.12:9000/signup', data)
+      .post('http://192.168.0.2:9000/signup', data)
       .catch(err => console.error(err));
     this.notifyWrong(signup);
   }

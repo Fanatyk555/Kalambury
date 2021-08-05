@@ -17,7 +17,7 @@ const Chat = forwardRef((props, messagesEnd) => {
   function handleSendMessage(){
     const data = [userId, userName, writedMessage]
     axios
-      .post('http://192.168.0.12:9000/newMessage', data)
+      .post('http://192.168.0.2:9000/newMessage', data)
       .catch(err => console.error(err));
     setWritedMessage("");
   }
