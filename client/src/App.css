@@ -1,0 +1,173 @@
+body > #root > div {
+	height: 100vh;
+	max-height: 100vh;
+}
+
+svg path {
+	fill: none;
+	stroke: #000;
+	stroke-width: 2;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	transition: 0.5s;
+}
+
+body{
+	background: linear-gradient(to top left, #8e0e00 25%, #1a1a1a 50%);
+	font-family: "Kalam", cursive !important;
+	font-size:24px !important;
+}
+header{
+	padding-top: 0.7%;
+	height:7%;
+}
+header span{
+	letter-spacing: 2px !important
+}
+main{
+	height: 87%;
+}
+h3{
+	margin-top:10 !important;
+}
+.lewo{
+	border: 2px solid dark;
+	border-top-right-radius: 15px;
+	border-bottom-right-radius: 15px;
+	background-color:#1d4350;
+	text-align:center;
+	max-height: 87vh;
+}
+.color{
+	width:40px;
+	height:40px;
+	border: 2px solid black;
+	border-radius: 50%;
+	margin-bottom:15px;
+	margin-left:15%;
+}
+.gumka{
+	width:40px;
+	height:40px;
+	margin-bottom:15px;
+	margin-left:15%;
+	margin-top:-25px;
+}
+.color:hover, .gumka:hover{
+	cursor:pointer;
+}
+.red{
+	background-color:red;
+}
+.orange{
+	background-color:orange;
+}
+.yellow{
+	background-color:yellow;
+}
+.green{
+	background-color:green;
+}
+.l-blue{
+	background-color:#00ccff;
+}
+.blue{
+	background-color:blue;
+}
+.purple{
+	background-color:purple;
+}
+.white{
+	background-color:white;
+}
+.black{
+	background-color:black;
+}
+.disabled{
+	opacity: 0.5;
+}
+.disabled:hover{
+	cursor:default;
+}
+.srodek{
+	border: 2px solid dark;
+	border-radius: 15px;
+	background-color:#e6e6e6;
+	max-height: 87vh;
+}
+canvas, svg {
+	border: 2px solid dark;
+	border-radius: 15px;
+	background-color:#e6e6e6;
+}
+.prawo{
+	border: 2px solid dark;
+	border-top-left-radius: 15px;
+	border-bottom-left-radius: 15px;
+	background-color:#1d4350;
+	text-align:center;
+	max-height: 87vh;
+}
+.ranking{
+	width:100%;
+	height:30%;
+	background-color:#e6e6e6;
+	border-radius: 7px;
+}
+.chat{
+	width:100%;
+	height:50%;
+	background-color:#e6e6e6;
+	border-radius: 7px;
+}
+.text{
+	width:100%;
+	height:90%;
+	background-color:#e6e6e6;
+	border-top-left-radius: 7px;
+	border-top-right-radius: 7px;
+	text-align: left;
+	font-size: x-small;
+	overflow-y: auto;
+}
+.chatMessage{
+	/* border: 6px solid #dedede; */
+	border-left: 5px solid #dedede;
+	border-right: 5px solid #dedede;
+	border-top: 2px solid #dedede;
+	border-bottom: 2px solid #dedede;
+	background-color: #f1f1f1;
+	border-radius: 5px;
+	padding: 2px;
+	margin: px 0;
+}
+.chatMessage span{
+	float: left,top;
+	max-width: 60px;
+	width: 100%;
+	margin-right: 20px;
+	font-size: x-small;
+}
+.chatMessage p{
+	font-size: small;
+}
+.chatMessage::after {
+	content: "";
+	clear: both;
+	display: table;
+  }
+.send{
+	width:100%;
+	height:10%;
+	background-color:gray;
+	border-bottom-left-radius: 7px;
+	border-bottom-right-radius: 7px;
+}
+.send .btn{
+	border-bottom-left-radius: 0px;
+	border-top-left-radius: 0px;
+}
+footer{
+	height:6%;
+  	text-align: center;
+}
