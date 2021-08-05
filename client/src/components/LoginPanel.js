@@ -14,29 +14,21 @@ class LoginPanel extends React.Component{
     isLogged: false
   }
   handleKeyPressLogin = (e) => {
-    if (e.key === 'Enter') {
-      this.handleAccountLogin();
-    }
+    if (e.key === 'Enter') this.handleAccountLogin();
+    else return null;
   }
   handleKeyPressSignup = (e) => {
-    if (e.key === 'Enter') {
-      this.handleAccountSignup();
-    }
+    if (e.key === 'Enter') this.handleAccountSignup();
+    else return null;
   }
   handleLoginInput = (e) => {
-    this.setState({
-      userLogin: e.target.value
-    })
+    this.setState({ userLogin: e.target.value })
   }
   handlePasswordInput = (e) => {
-    this.setState({
-      userPassword: e.target.value
-    })
+    this.setState({ userPassword: e.target.value })
   }
   handleEMailInput = (e) => {
-    this.setState({
-      userEMail: e.target.value
-    })
+    this.setState({ userEMail: e.target.value })
   }
   notifyWrong = (x) => toast(x, {
     position: "top-center",
@@ -48,41 +40,34 @@ class LoginPanel extends React.Component{
     progress: undefined,
   });
   handleAccountLogin = () => {
-    let login = "Niepoprawny login lub hasło";
-    const user = [this.state.userLogin, this.state.userPassword];
+    const wrongLogin = "Niepoprawny login lub hasło";
+    const data = [this.state.userLogin, this.state.userPassword];
     axios
-      .post('http://192.168.0.12:9000/login', user)
-      .catch(err => {
-        console.error(err);
-      });
+      .post('http://192.168.0.12:9000/login', data)
+      .catch(err => console.error(err));
     setTimeout(() => {
       fetch('http://192.168.0.12:9000/login')
       .then(res => res.json())
-      .then(res => this.setState({
-        apiResponseUserId: res
-      }))
+      .then(res => this.setState({ apiResponseUserId: res }))
     }, 300);
     setTimeout(() => {
       if(this.state.apiResponseUserId.length !== 0){
-        // const userId = JSON.stringify(this.state.apiResponseUserId[0]);
         const userId = this.state.apiResponseUserId.map(user => user.id)
         sessionStorage.setItem("userName", this.state.userLogin);
         sessionStorage.setItem("userPassword", this.state.userPassword);
         sessionStorage.setItem("userId", userId);
         sessionStorage.setItem("isLogged", true);
-        this.setState({isLogged: true});
+        this.setState({ isLogged: true });
       } 
-      else this.notifyWrong(login);
+      else this.notifyWrong(wrongLogin);
     }, 500);
   }
   handleAccountSignup = () => {
-    let signup = "Zarejestrowano pomyślnie!";
-    const user = [this.state.userLogin, this.state.userPassword, this.state.userEMail];
+    const signup = "Zarejestrowano pomyślnie!";
+    const data = [this.state.userLogin, this.state.userPassword, this.state.userEMail];
     axios
-      .post('http://192.168.0.12:9000/signup', user)
-      .catch(err => {
-        console.error(err);
-      });
+      .post('http://192.168.0.12:9000/signup', data)
+      .catch(err => console.error(err));
     this.notifyWrong(signup);
   }
   render(){

@@ -6,13 +6,13 @@ import Svg from './Svg';
 import Ranking from './Ranking';
 import Chat from './Chat';
 
-const MainDraw = (props) => {
+const Main = (props) => {
   const messagesEnd = useRef()
   function scrollToBottom(){
     messagesEnd.current.scrollIntoView({ behavior: "smooth" });
   }
   useEffect(() => {
-    scrollToBottom()
+    scrollToBottom();
   }, [props.message])
   return(
     <main className="row justify-content-between">
@@ -20,7 +20,7 @@ const MainDraw = (props) => {
         <DrawPanel action={props.action}/> 
       </div>
       {props.action === "draw" ? 
-      (props.gameStarted === false?
+      (props.gameStarted === false ?
         <div className="col-sm-8  row align-items-center text-dark">
           <div className="row justify-content-center">
             <button className="col-sm-3 btn-light btn-lg" onClick={props.handleStartGame}>Start Game!</button>
@@ -29,7 +29,10 @@ const MainDraw = (props) => {
       :<Canvas path={props.canvasPath} action={props.action} className="srodek col-sm-8 text-dark"/>)
       :<Svg path={props.canvasPath} className="srodek col-sm-8 text-dark"/>}
       <div className="prawo col-sm-2 text-white">
-        <Ranking/>
+        <Ranking 
+          usersList={props.usersList}
+          usersRanking={props.usersRanking}
+        />
         <br/>
         <Chat 
           writeHandle={props.writeHandle} 
@@ -43,4 +46,4 @@ const MainDraw = (props) => {
   )
 }
 
-export default MainDraw;
+export default Main;

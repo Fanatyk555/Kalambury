@@ -3,18 +3,21 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'react-toastify/dist/ReactToastify.css';
 import React from 'react';
 import Paper from 'paper';
+import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
-import { BrowserRouter as Router, Switch, Route} from "react-router-dom";
+import { BrowserRouter as Router, Switch, Route, Redirect} from "react-router-dom";
 import Header from './Header';
-import MainDraw from './Main';
+import Main from './Main';
 import Footer from './Footer';
 import LoginPanel from './LoginPanel';
 
 class App extends React.Component {
   state = {
     apiResponse: "",
-    apiResponseChatMessages: [],
-    apiResponseChatActiveMessages: [],
+    chatMessages: [],
+    chatActiveMessages: [],
+    loggedUsersList: [],
+    usersRanking: [],
     roundNumber: "",
     activeWord: "",
     gameStartTime: "",
@@ -24,7 +27,7 @@ class App extends React.Component {
     action: "",
     timeS: 0,
     timeM: 0,
-    time: 0
+    redirectFromDraw: false
   }
   componentDidMount(){
     setInterval(() => {
@@ -37,62 +40,53 @@ class App extends React.Component {
       this.newRound();
     }, 1000);
   }
+
   callAPI(){
     fetch("http://192.168.0.12:9000/testAPI")
     .then(res => res.json())
-    .then(res => this.setState({
-      apiResponse: [...res]
-    }))
+    .then(res => this.setState({ apiResponse: res }));
+    const userName = sessionStorage.getItem('userName') || "guest";
+    const data = [userName];
+    axios
+      .post('http://192.168.0.12:9000/isLogged', data)
+      .catch(err => console.error(err));
+    fetch("http://192.168.0.12:9000/loggedUsersList")
+    .then(res => res.json())
+    .then(res => this.setState({ loggedUsersList: res }));
+    fetch("http://192.168.0.12:9000/usersRanking")
+    .then(res => res.json())
+    .then(res => {
+      if(this.state.usersRanking !== res) this.setState({ usersRanking: res })
+      else return null
+    });
   }
-  // callWord(){
-  //   fetch("http://192.168.0.12:9000/word")
-  //   .then(res => res.json())
-  //   .then(res => this.setState({
-  //     activeWord: res[0]
-  //   }))
-  // }
   handleActionGuess = () => {
-    this.setState({
-      action: "guess"
-    })
+    this.setState({ action: "guess" })
+    sessionStorage.setItem("action", "guess");
   }
   handleActionDraw = () => {
-    this.setState({
-      action: "draw"
-    })
+    this.setState({ action: "draw" })
+    sessionStorage.setItem("action", "draw");
   }
   timer = () => {
-    let today = new Date();
-    let sec = today.getSeconds();
-    let min = today.getMinutes();
-    let oldToday = this.state.gameStartTime;
-    oldToday = new Date(oldToday);
-    const diffTimeMinutes = Math.floor((today - oldToday)/1000/60);
-    const diffTimeSeconds = Math.floor((today - oldToday)/1000);
-    const diffTimeSeconds1 = Math.floor((today.getMinutes() - oldToday.getMinutes()));
-    const diffTimeSeconds2 = Math.floor((today.getSeconds() - oldToday.getSeconds()));
-    const diffTimeSeconds3 = Math.floor((today.getSeconds() + oldToday.getSeconds()));
-    if(diffTimeSeconds2>0)console.log(diffTimeSeconds2);
-    else console.log(diffTimeSeconds3);
-    // console.log(diffTimeMinutes);
-    // console.log(diffTimeSeconds);
-    // console.log(diffTimeSeconds1);
-    // console.log(diffTimeSeconds2);
-    // console.log(oldToday);
-    // console.log(today);
-    // console.log((today-oldToday)/60000)
+    const nowTime = new Date();
+    const oldTime = new Date(this.state.gameStartTime);
+    const diffTime = Math.abs((nowTime - oldTime)/1000);
+    const minutes = Math.floor(diffTime / 60) % 60;
+    const seconds = Math.floor(diffTime % 60);
     this.setState({
-      timeS: sec
+      timeM: minutes,
+      timeS: seconds
     })
+    const action = sessionStorage.getItem('action') || "unknown";
+    this.setState({ action })
   }
   getRoundData = () => {
     fetch('http://192.168.0.12:9000/roundData')
     .then(res => res.json())
     .then(res => {
-      let splitRes = res[0];
-      let one = JSON.stringify(res);
-      let two = JSON.stringify(this.state.apiResponseRoundData);
-      if(one !== two){
+      const splitRes = res[0];
+      if(this.state.apiResponseRoundData !== res){
         this.setState({
           roundNumber: splitRes[0],
           activeWord: splitRes[1],
@@ -101,19 +95,13 @@ class App extends React.Component {
         })
       }
       else return null
-    })
+    });
   }
   getChatMessages = () => {
     fetch('http://192.168.0.12:9000/chatMessages')
     .then(res => res.json())
     .then(res => {
-      let one = JSON.stringify(res);
-      let two = JSON.stringify(this.state.apiResponseChatMessages);
-      if(one !== two){
-        this.setState({
-          apiResponseChatMessages: res
-        })
-      }
+      if(this.state.chatMessages !== res) this.setState({ chatMessages: res })
       else return null
     })
   }
@@ -121,30 +109,29 @@ class App extends React.Component {
     fetch('http://192.168.0.12:9000/chatActiveMessages')
     .then(res => res.json())
     .then(res => {
-      let one = JSON.stringify(res);
-      let two = JSON.stringify(this.state.apiResponseChatActiveMessages);
-      if(one !== two){
-        this.setState({
-          apiResponseChatActiveMessages: res
-        })
-      }
+      if(this.state.chatActiveMessages !== res) this.setState({ chatActiveMessages: res })
       else return null
     })
   }
   checkWhoGuess = () => {
     const word = this.state.activeWord;
-    const messages = this.state.apiResponseChatActiveMessages;
+    const messages = this.state.chatActiveMessages;
     let whoId, whoName;
-    // console.log(this.state.apiResponseChatActiveMessages);
-    // console.log(messages.indexOf(word));
     messages.map(array => {
       if(array.includes(word)===true) return(whoId = array[0], whoName = array[1]);
       else return null
     })
     if(whoId >= 0){
       this.notifyWinner(whoName);
-      this.setState({newRound: true});
-      // console.log("koniec rundy");
+      const data = [whoName];
+      if(this.state.action === "draw"){
+        axios
+          .post('http://192.168.0.12:9000/updateRank', data)
+          .catch(err => console.error(err));
+        this.setState({newRound: true, redirectFromDraw: true});
+        sessionStorage.setItem("action", "guess");
+      }
+      else this.setState({ redirectFromDraw: false });
     }
     else return null;
   }
@@ -156,14 +143,15 @@ class App extends React.Component {
   }
   newRound = () => {
     if(this.state.newRound === true){
-      // this.callWord();
       this.clear();
-      // uaktualnij ranking
-      this.setState({
-        newRound: false,
-        timeM: 0,
-        timeS: 0
-      })
+      const userName = sessionStorage.getItem('userName') || 'unknown';
+      if(this.state.action === "draw"){
+        const data = [userName];
+        axios
+          .post('http://192.168.0.12:9000/newRound', data)
+          .catch(err => console.error(err));
+      }
+      this.setState({ newRound: false })
     }
     else return null;
   }
@@ -183,23 +171,18 @@ class App extends React.Component {
     })
   }
   render() {
-    const userName = sessionStorage.getItem('userName') || "brak loginu";
-    const userPassword = sessionStorage.getItem('userPassword') || "brak hasła";
-    const userId = sessionStorage.getItem('userId') || "brak userId";
-    const isLogged = sessionStorage.getItem('isLogged') || "brak isLogged";
     return (
       <>
         <Router>
+          {this.state.redirectFromDraw === true ? <Redirect to="guess"/> : null}
           <Switch>
             <Route exact path="/">
               <div className="container-fluid text-white">
                 <LoginPanel/>
               </div>
             </Route>
-            <Route path="/draw">
+            <Route exact path="/draw">
               <div className="container-fluid text-white">
-                {this.state.time}
-                {/* <p>{userName} {userPassword} {isLogged} {userId}</p> */}
                 <ToastContainer position="top-center"
                   autoClose={5000}
                   hideProgressBar={false}
@@ -217,17 +200,19 @@ class App extends React.Component {
                   timerS={this.state.timeS} timerM={this.state.timeM} 
                   activeWord={this.state.activeWord}
                 />
-                <MainDraw 
-                  canvasPath={this.state.apiResponse} 
+                <Main 
+                  canvasPath={this.state.apiResponse}
+                  usersList={this.state.loggedUsersList} 
+                  usersRanking={this.state.usersRanking}
                   action={this.state.action}
-                  message={this.state.apiResponseChatMessages}
+                  message={this.state.chatMessages}
                   gameStarted={this.state.gameStarted}
                   handleStartGame={this.handleStartGame}
                 />
                 <Footer/>
               </div>
             </Route>
-            <Route path="/guess">
+            <Route exact path="/guess">
               <div className="container-fluid text-white">
                 <ToastContainer
                   position="top-center"
@@ -247,10 +232,12 @@ class App extends React.Component {
                   timerS={this.state.timeS} 
                   timerM={this.state.timeM} 
                   activeWord={this.state.activeWord}/>
-                <MainDraw 
-                  canvasPath={this.state.apiResponse} 
+                <Main 
+                  canvasPath={this.state.apiResponse}
+                  usersList={this.state.loggedUsersList} 
+                  usersRanking={this.state.usersRanking}
                   action={this.state.action} 
-                  message={this.state.apiResponseChatMessages}/>
+                  message={this.state.chatMessages}/>
                 <Footer/>
               </div>
             </Route>

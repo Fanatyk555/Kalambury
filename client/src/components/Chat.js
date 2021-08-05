@@ -11,24 +11,22 @@ const Chat = forwardRef((props, messagesEnd) => {
     setWritedMessage(e.target.value)
   }
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleSendMessage();
-    }
+    if (e.key === 'Enter') handleSendMessage();
+    else return null;
   }
   function handleSendMessage(){
-    let messageArray = [userId, userName, writedMessage]
+    const data = [userId, userName, writedMessage]
     axios
-      .post('http://192.168.0.12:9000/newMessage', messageArray)
-      .catch(err => {
-        console.error(err);
-      });
+      .post('http://192.168.0.12:9000/newMessage', data)
+      .catch(err => console.error(err));
     setWritedMessage("");
   }
   const messageList = props.message.map((message, index)=>
     <div key={index} className="chatMessage">
-        <span>{message[0]}</span>
-        <p>{message[1]}</p> 
-    </div>)
+      <span>{message[0]}</span>
+      <p>{message[1]}</p> 
+    </div>
+  )
   return(
     <div className="chat text-dark">
       <div className="text">
