@@ -20,13 +20,13 @@ const Main = (props) => {
         <DrawPanel action={props.action}/> 
       </div>
       {props.action === "draw" ? 
-      (props.gameStarted === false ?
-        <div className="col-sm-8  row align-items-center text-dark">
-          <div className="row justify-content-center">
-            <button className="col-sm-3 btn-light btn-lg" onClick={props.handleStartGame}>Start Game!</button>
-          </div>
-        </div>
-      :<Canvas path={props.canvasPath} action={props.action} className="srodek col-sm-8 text-dark"/>)
+      // (props.gameStarted === false ?
+      //   <div className="col-sm-8  row align-items-center text-dark">
+      //     <div className="row justify-content-center">
+      //       <button className="col-sm-3 btn-light btn-lg" onClick={props.handleStartGame}>Start Game!</button>
+      //     </div>
+      //   </div>:
+      <Canvas path={props.canvasPath} action={props.action} className="srodek col-sm-8 text-dark"/>
       :<Svg path={props.canvasPath} className="srodek col-sm-8 text-dark"/>}
       <div className="prawo col-sm-2 text-white">
         <Ranking 

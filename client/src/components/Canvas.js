@@ -29,7 +29,7 @@ const Canvas = (props) => {
       refB.current = pathString;
       const data = pathString;
       axios
-        .post('http://192.168.0.2:9000/testAPI', data)
+        .post('http://192.168.0.3:9000/testAPI', data)
         .catch(err => console.error(err));
     };
     Paper.view.draw();

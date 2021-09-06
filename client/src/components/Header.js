@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import Paper from 'paper';
 const Header = (props) => {
   function drawReset(){
-    fetch('http://192.168.0.2:9000/reset');
+    fetch('http://192.168.0.3:9000/reset');
     Paper.project.activeLayer.removeChildren();
   }
   const str = props.activeWord;

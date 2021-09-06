@@ -3,7 +3,10 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-var cors = require('cors')
+var cors = require('cors');
+var cookieParser = require('cookie-parser');
+var express = require('express');
+var timeout = require('connect-timeout');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -29,6 +32,9 @@ app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(timeout('1s'));
+app.use(cookieParser());
+app.use(haltOnTimedout);
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
@@ -108,12 +114,12 @@ app.post('/newRound', function (req, res) {
     var newResult = result.map((result)=>result.text);
     global.globalWord = newResult; 
   })
-  setTimeout(() => {
+  
     console.log(globalWord);
     con.query(`INSERT INTO round (roundNumber, roundWord, startTime, drawerName) VALUES ('1','${globalWord}','${d}','${data[0]}')`, function (err, result, fields) {
       if (err) throw err;
     })
-  }, 200);
+  
   usersList = [];
 })
 
@@ -205,6 +211,10 @@ app.post('/testAPI', function(req, res) {
     sendVar++;
   });
 });
+
+function haltOnTimedout (req, res, next) {
+  if (!req.timedout) next()
+}
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

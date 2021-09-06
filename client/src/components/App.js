@@ -27,7 +27,8 @@ class App extends React.Component {
     action: "",
     timeS: 0,
     timeM: 0,
-    redirectFromDraw: false
+    redirectFromDraw: false,
+    redirectFromGuess: false,
   }
   componentDidMount(){
     setInterval(() => {
@@ -42,18 +43,18 @@ class App extends React.Component {
   }
 
   callAPI(){
-    fetch("http://192.168.0.2:9000/testAPI")
+    fetch("http://192.168.0.3:9000/testAPI")
     .then(res => res.json())
     .then(res => this.setState({ apiResponse: res }));
     const userName = sessionStorage.getItem('userName') || "guest";
     const data = [userName];
     axios
-      .post('http://192.168.0.2:9000/isLogged', data)
+      .post('http://192.168.0.3:9000/isLogged', data)
       .catch(err => console.error(err));
-    fetch("http://192.168.0.2:9000/loggedUsersList")
+    fetch("http://192.168.0.3:9000/loggedUsersList")
     .then(res => res.json())
     .then(res => this.setState({ loggedUsersList: res }));
-    fetch("http://192.168.0.2:9000/usersRanking")
+    fetch("http://192.168.0.3:9000/usersRanking")
     .then(res => res.json())
     .then(res => {
       if(this.state.usersRanking !== res) this.setState({ usersRanking: res })
@@ -82,7 +83,7 @@ class App extends React.Component {
     this.setState({ action })
   }
   getRoundData = () => {
-    fetch('http://192.168.0.2:9000/roundData')
+    fetch('http://192.168.0.3:9000/roundData')
     .then(res => res.json())
     .then(res => {
       const splitRes = res[0];
@@ -98,7 +99,7 @@ class App extends React.Component {
     });
   }
   getChatMessages = () => {
-    fetch('http://192.168.0.2:9000/chatMessages')
+    fetch('http://192.168.0.3:9000/chatMessages')
     .then(res => res.json())
     .then(res => {
       if(this.state.chatMessages !== res) this.setState({ chatMessages: res })
@@ -106,7 +107,7 @@ class App extends React.Component {
     })
   }
   getChatActiveMessages = () => {
-    fetch('http://192.168.0.2:9000/chatActiveMessages')
+    fetch('http://192.168.0.3:9000/chatActiveMessages')
     .then(res => res.json())
     .then(res => {
       if(this.state.chatActiveMessages !== res) this.setState({ chatActiveMessages: res })
@@ -126,7 +127,7 @@ class App extends React.Component {
       const data = [whoName];
       if(this.state.action === "draw"){
         axios
-          .post('http://192.168.0.2:9000/updateRank', data)
+          .post('http://192.168.0.3:9000/updateRank', data)
           .catch(err => console.error(err));
         this.setState({newRound: true, redirectFromDraw: true});
         sessionStorage.setItem("action", "guess");
@@ -136,8 +137,8 @@ class App extends React.Component {
     else return null;
   }
   clear = () => {
-    fetch('http://192.168.0.2:9000/reset');
-    fetch('http://192.168.0.2:9000/resetChat');
+    fetch('http://192.168.0.3:9000/reset');
+    fetch('http://192.168.0.3:9000/resetChat');
     if(Paper.project !== null) Paper.project.activeLayer.removeChildren();
     else if(Paper.project === null) return null;
   }
@@ -148,10 +149,13 @@ class App extends React.Component {
       if(this.state.action === "draw"){
         const data = [userName];
         axios
-          .post('http://192.168.0.2:9000/newRound', data)
+          .post('http://192.168.0.3:9000/newRound', data)
           .catch(err => console.error(err));
       }
-      this.setState({ newRound: false })
+      // this.setState({ newRound: false })
+      setTimeout(() => {
+        this.setState({ newRound: false })
+      }, 500);
     }
     else return null;
   }
@@ -175,6 +179,7 @@ class App extends React.Component {
       <>
         <Router>
           {this.state.redirectFromDraw === true ? <Redirect to="guess"/> : null}
+          {this.state.redirectFromGuess === true ? <><Redirect to="draw"/><div>123</div></> : null}
           <Switch>
             <Route exact path="/">
               <div className="container-fluid text-white">
