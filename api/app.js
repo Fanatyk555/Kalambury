@@ -74,7 +74,6 @@ var usersList = [];
 app.post('/isLogged', function (req, res) {
   //to co wysyła klient do serwera przez axios
   let userName = req.body;
-  // console.log(userName);
   if(usersList.includes(userName[0])===true) return null;
   else return usersList.push(userName[0]);
 })

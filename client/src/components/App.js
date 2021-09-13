@@ -5,7 +5,6 @@ import React from 'react';
 import Paper from 'paper';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
-import { BrowserRouter as Router, Switch, Route, Redirect} from "react-router-dom";
 import Header from './Header';
 import Main from './Main';
 import Footer from './Footer';
@@ -20,6 +19,7 @@ class App extends React.Component {
     usersRanking: [],
     roundNumber: "",
     activeWord: "",
+    MyName: "",
     gameStartTime: "",
     drawerName: "",
     gameStarted: false,
@@ -39,6 +39,23 @@ class App extends React.Component {
       this.getRoundData();
       this.checkWhoGuess();
       this.newRound();
+      const action = sessionStorage.getItem('action') || "unknown";
+      this.setState({ action })
+    }, 1000);
+    setInterval(() => {
+      const userName = sessionStorage.getItem('userName') || "guest";
+      if(this.state.action === "guess"){
+        // if(userName===this.state.drawerName)this.handleActionDraw();
+        // else return null;
+        setTimeout(() => {
+          if(userName===this.state.drawerName)this.handleActionDraw();
+          else return null;
+        }, 5000);
+      }
+      else if(this.state.action === "draw"){
+        if(userName!==this.state.drawerName)this.handleActionGuess();
+        else return null;
+      }
     }, 1000);
   }
 
@@ -47,10 +64,13 @@ class App extends React.Component {
     .then(res => res.json())
     .then(res => this.setState({ apiResponse: res }));
     const userName = sessionStorage.getItem('userName') || "guest";
-    const data = [userName];
-    axios
-      .post('http://192.168.0.3:9000/isLogged', data)
-      .catch(err => console.error(err));
+    if(userName!=="guest"){
+      const data = [userName];
+      axios
+        .post('http://192.168.0.3:9000/isLogged', data)
+        .catch(err => console.error(err));
+    }
+    else return null;
     fetch("http://192.168.0.3:9000/loggedUsersList")
     .then(res => res.json())
     .then(res => this.setState({ loggedUsersList: res }));
@@ -144,20 +164,27 @@ class App extends React.Component {
   }
   newRound = () => {
     if(this.state.newRound === true){
+      const userName = sessionStorage.getItem('userName') || 'guest';
       this.clear();
-      const userName = sessionStorage.getItem('userName') || 'unknown';
       if(this.state.action === "draw"){
-        const data = [userName];
+        this.createQueue();
+        const data = [this.state.loggedUsersList[0]];
         axios
           .post('http://192.168.0.3:9000/newRound', data)
           .catch(err => console.error(err));
       }
-      // this.setState({ newRound: false })
-      setTimeout(() => {
-        this.setState({ newRound: false })
-      }, 500);
+      this.setState({ newRound: false })
     }
     else return null;
+  }
+  createQueue = () => {
+    const userName = sessionStorage.getItem('userName') || 'guest';
+    if(userName===this.state.drawerName){
+      let usersQ = [...this.state.loggedUsersList]
+      usersQ.shift();
+      usersQ.push(userName);
+      this.setState({ loggedUsersList: usersQ});
+    }
   }
   notifyWinner = (winner) => toast(`${winner} odgadł hasło: "${this.state.activeWord}"`,{
     position: "top-center",
@@ -177,77 +204,74 @@ class App extends React.Component {
   render() {
     return (
       <>
-        <Router>
-          {this.state.redirectFromDraw === true ? <Redirect to="guess"/> : null}
-          {this.state.redirectFromGuess === true ? <><Redirect to="draw"/><div>123</div></> : null}
-          <Switch>
-            <Route exact path="/">
-              <div className="container-fluid text-white">
-                <LoginPanel/>
-              </div>
-            </Route>
-            <Route exact path="/draw">
-              <div className="container-fluid text-white">
-                <ToastContainer position="top-center"
-                  autoClose={5000}
-                  hideProgressBar={false}
-                  newestOnTop={false}
-                  closeOnClick
-                  rtl={false}
-                  pauseOnFocusLoss={false}
-                  draggable
-                  pauseOnHover
-                />
-                <Header 
-                  action={this.state.action} 
-                  handleActionGuess={this.handleActionGuess} 
-                  handleActionDraw={this.handleActionDraw} 
-                  timerS={this.state.timeS} timerM={this.state.timeM} 
-                  activeWord={this.state.activeWord}
-                />
-                <Main 
-                  canvasPath={this.state.apiResponse}
-                  usersList={this.state.loggedUsersList} 
-                  usersRanking={this.state.usersRanking}
-                  action={this.state.action}
-                  message={this.state.chatMessages}
-                  gameStarted={this.state.gameStarted}
-                  handleStartGame={this.handleStartGame}
-                />
-                <Footer/>
-              </div>
-            </Route>
-            <Route exact path="/guess">
-              <div className="container-fluid text-white">
-                <ToastContainer
-                  position="top-center"
-                  autoClose={5000}
-                  hideProgressBar={false}
-                  newestOnTop={false}
-                  closeOnClick
-                  rtl={false}
-                  pauseOnFocusLoss={false}
-                  draggable
-                  pauseOnHover
-                />
-                <Header 
-                  action={this.state.action} 
-                  handleActionGuess={this.handleActionGuess} 
-                  handleActionDraw={this.handleActionDraw} 
-                  timerS={this.state.timeS} 
-                  timerM={this.state.timeM} 
-                  activeWord={this.state.activeWord}/>
-                <Main 
-                  canvasPath={this.state.apiResponse}
-                  usersList={this.state.loggedUsersList} 
-                  usersRanking={this.state.usersRanking}
-                  action={this.state.action} 
-                  message={this.state.chatMessages}/>
-                <Footer/>
-              </div>
-            </Route>
-          </Switch>
-        </Router>
+        {/* {this.state.redirectFromDraw === true ? <Redirect to="guess"/> : null}
+        {this.state.redirectFromGuess === true ? <><Redirect to="draw"/><div>123</div></> : null} */}
+        {this.state.action==="unknown"?<>
+          <div className="container-fluid text-white">
+            <LoginPanel/>
+          </div>
+        </>:null}
+        {this.state.action==="draw"?<>
+          <div className="container-fluid text-white">
+            <ToastContainer position="top-center"
+              autoClose={5000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss={false}
+              draggable
+              pauseOnHover
+            />
+            <Header 
+              action={this.state.action} 
+              handleActionGuess={this.handleActionGuess} 
+              handleActionDraw={this.handleActionDraw} 
+              timerS={this.state.timeS} timerM={this.state.timeM} 
+              activeWord={this.state.activeWord}
+            />
+            <Main 
+              canvasPath={this.state.apiResponse}
+              usersList={this.state.loggedUsersList} 
+              usersRanking={this.state.usersRanking}
+              action={this.state.action}
+              message={this.state.chatMessages}
+              gameStarted={this.state.gameStarted}
+              handleStartGame={this.handleStartGame}
+            />
+            <Footer/>
+          </div>
+        </>:null}
+        {this.state.action==="guess"?<>
+          <div className="container-fluid text-white">
+            <ToastContainer
+              position="top-center"
+              autoClose={5000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss={false}
+              draggable
+              pauseOnHover
+            />
+            <Header 
+              action={this.state.action} 
+              handleActionGuess={this.handleActionGuess} 
+              handleActionDraw={this.handleActionDraw} 
+              timerS={this.state.timeS} 
+              timerM={this.state.timeM} 
+              activeWord={this.state.activeWord}
+            />
+            <Main 
+              canvasPath={this.state.apiResponse}
+              usersList={this.state.loggedUsersList} 
+              usersRanking={this.state.usersRanking}
+              action={this.state.action} 
+              message={this.state.chatMessages}/>
+            <Footer/>
+          </div>
+        </>:null}
       </>
     )
   }

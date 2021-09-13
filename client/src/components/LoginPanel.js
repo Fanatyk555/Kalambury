@@ -2,7 +2,6 @@ import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
-import { Redirect } from 'react-router';
 import { ToastContainer, toast } from 'react-toastify';
 
 class LoginPanel extends React.Component{
@@ -57,6 +56,7 @@ class LoginPanel extends React.Component{
         sessionStorage.setItem("userPassword", this.state.userPassword);
         sessionStorage.setItem("userId", userId);
         sessionStorage.setItem("isLogged", true);
+        sessionStorage.setItem("action", "guess");
         this.setState({ isLogged: true });
       } 
       else this.notifyWrong(wrongLogin);
@@ -107,7 +107,7 @@ class LoginPanel extends React.Component{
             <br/>
             <button onClick={this.handleAccountLogin}>Zaloguj się</button>
           </div>
-          {this.state.isLogged === true ? <Redirect to='/guess'/> : null}
+          {/* {this.state.isLogged === true ? <Redirect to='/guess'/> : null} */}
           <div className="signup col-sm-3">
             <label>
               <small>Username: </small>

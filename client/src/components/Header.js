@@ -1,6 +1,5 @@
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Link } from "react-router-dom";
 import Paper from 'paper';
 const Header = (props) => {
   function drawReset(){
@@ -14,16 +13,12 @@ const Header = (props) => {
   return(
     <header className="row align-content-center">
       <div className="col-sm-5">
-        {props.action === "draw" ?
+        {props.action === "draw"?
         <>
-          <Link to="/guess" onClick={props.handleActionGuess}>
-            <button className="btn-light btn-sm">To guess</button>
-          </Link>
+          <button className="btn-light btn-sm" onClick={()=>sessionStorage.setItem("action", "guess")}>To guess</button>
           <button onClick={drawReset} className="btn-light btn-sm">Reset</button>
         </>:
-        <Link to="/draw" onClick={props.handleActionDraw}>
-          <button className="btn-light btn-sm">To draw</button>
-        </Link>}
+          <button className="btn-light btn-sm" onClick={()=>sessionStorage.setItem("action", "draw")}>To draw</button>}
       </div>
       <h3 className="col-sm-3">
         {props.action === "draw" ? <p>Hasło: {props.activeWord}</p> : <p>Hasło: <span>{strMap}</span></p>}
